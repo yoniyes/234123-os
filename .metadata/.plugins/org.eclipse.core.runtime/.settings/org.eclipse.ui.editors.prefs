@@ -1,0 +1,15 @@
+AbstractTextEditor.Color.Background=230,248,255
+AbstractTextEditor.Color.Background.SystemDefault=false
+AbstractTextEditor.Color.Foreground=128,128,0
+AbstractTextEditor.Color.SelectionBackground.SystemDefault=false
+AbstractTextEditor.Color.SelectionForeground.SystemDefault=false
+PHPReadOccurrenceIndicationColor=0,0,0
+PHPWriteOccurrenceIndicationColor=0,0,0
+eclipse.preferences.version=1
+filteredSearchResultIndicationColor=0,0,0
+hyperlinkColor.SystemDefault=false
+javaScriptOccurrenceIndicationColor=0,0,0
+occurrenceIndicationColor=0,0,0
+overviewRuler_migration=migrated_3.1
+searchResultIndicationColor=0,0,0
+writeOccurrenceIndicationColor=0,0,0
