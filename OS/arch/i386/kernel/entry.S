@@ -650,6 +650,12 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_sched_setaffinity)
 	.long SYMBOL_NAME(sys_sched_getaffinity)
 
+	###	HW1 sys_calls start	###
+	.long SYMBOL_NAME(sys_attach_proc)
+	.long SYMBOL_NAME(sys_get_child_processes)
+	.long SYMBOL_NAME(sys_get_child_process_count)	/* 245 */
+	###	HW1 sys_calls end	###
+
 	.rept NR_syscalls-(.-sys_call_table)/4
 		.long SYMBOL_NAME(sys_ni_syscall)
 	.endr
