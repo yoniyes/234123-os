@@ -1,0 +1,289 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"cou",
+				"course_to_release"
+			],
+			[
+				"li",
+				"links"
+			],
+			[
+				"P",
+				"Port"
+			],
+			[
+				"tim",
+				"time_elapsed"
+			],
+			[
+				"status",
+				"status_line"
+			],
+			[
+				"vaca",
+				"vacancy_prefix"
+			],
+			[
+				"course",
+				"course_num"
+			],
+			[
+				"va",
+				"vacancy_prefix"
+			],
+			[
+				"for",
+				"foreach"
+			],
+			[
+				"cours",
+				"course_url"
+			],
+			[
+				"res",
+				"response"
+			],
+			[
+				"de",
+				"decoded_content"
+			],
+			[
+				"test",
+				"testsMacros"
+			],
+			[
+				"GCC",
+				"GCCWET1"
+			],
+			[
+				"inve",
+				"investmentHouse"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/arch",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/arch/i386",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/arch/i386/kernel",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/kernel"
+	],
+	"file_history":
+	[
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/kernel/pattach.h",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/kernel/pattach.c",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/kernel/fork.c",
+		"/Users/yonatanyeshanov/GitHub/234123-os/OS/kernel/exit.c",
+		"/Users/yonatanyeshanov/Desktop/perl/malagTracker",
+		"/Users/yonatanyeshanov/Desktop/perl/emayl.pl",
+		"/Users/yonatanyeshanov/Desktop/perl/emayl.py",
+		"/Users/yonatanyeshanov/Desktop/perl/malagTracker.bak",
+		"/Users/yonatanyeshanov/Desktop/perl/MALAG",
+		"/Users/yonatanyeshanov/Desktop/perl/tst.pl",
+		"/Users/yonatanyeshanov/Downloads/wet1Tests/randtest0.in",
+		"/Users/yonatanyeshanov/Downloads/TrollOrganizer.cpp",
+		"/Users/yonatanyeshanov/Downloads/Game.of.Thrones.S06E03.1080p.HDTV.x264-BATV-heb.srt",
+		"/Users/yonatanyeshanov/Downloads/test6/test6.out",
+		"/Users/yonatanyeshanov/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/E109C962-7D74-4BAA-8087-22BFD4FB832D/generate-ramdom-for-orrs-pokemon.py",
+		"/Users/yonatanyeshanov/Dropbox/Courses/Matam/ex4/Security/Security.cpp",
+		"/Users/yonatanyeshanov/Dropbox/Courses/Matam/ex4/Security/Security.h",
+		"/Users/yonatanyeshanov/Desktop/main1.cp",
+		"/Users/yonatanyeshanov/Desktop/library1.h",
+		"/Users/yonatanyeshanov/Desktop/library1.cpp",
+		"/Users/yonatanyeshanov/Dropbox/Courses/Matam/ex4/List/list.h",
+		"/Users/yonatanyeshanov/Library/Containers/com.apple.mail/Data/Library/Mail Downloads/D0474668-F660-404A-8BD7-AF9CBF078373/start_sysprep_x64.bat",
+		"/Volumes/Untitled/start_sysprep_x64.bat",
+		"/Users/yonatanyeshanov/Dropbox/Courses/Matam/ex3/ex3/testsMacros.h",
+		"/Users/yonatanyeshanov/Dropbox/Courses/Matam/ex3/tests/test_utilities.h",
+		"/Users/yonatanyeshanov/Documents/workspace/Tree/Debug/makefile",
+		"/Users/yonatanyeshanov/Downloads/ex4.s11",
+		"/Users/yonatanyeshanov/Downloads/הרפתקת שנה ה' – חלק ג' – השערים/word/document.xml",
+		"/Users/yonatanyeshanov/Desktop/Courses/Intro to Pyhton - Coursera/assn0.py",
+		"/Users/yonatanyeshanov/Desktop/git_test/check.txt",
+		"/Users/yonatanyeshanov/Desktop/matam/ex4/Security/Debug/Security_test.d",
+		"/Users/yonatanyeshanov/Downloads/makefile"
+	],
+	"find":
+	{
+		"height": 23.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"success",
+			"59",
+			"43",
+			"FeedTroll 59",
+			"87",
+			"56",
+			"49",
+			"56",
+			"44",
+			"56",
+			"43",
+			"22",
+			"rate",
+			"font",
+			"הפתרון ויסכימו",
+			"$(TESTDIR)test_commands",
+			"utilities",
+			"orders_test",
+			"orders",
+			"ETF",
+			"FLAGS_NO_LIB",
+			"TEST_GCC",
+			"LIST_GCC",
+			"TEST_PATH",
+			"COMMONS"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "untitled.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
