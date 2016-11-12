@@ -7,6 +7,7 @@
 #ifndef _PATTACH_H_
 #define _PATTACH_H_
 
+#include <linux/types.h>
 
 /**	WRAPPER TEMPLATE
 
@@ -42,7 +43,7 @@ int attach_proc (pid_t PID) {
 		: "memory"										// Clobber list.
 	);
 	// TODO: Check @res value and return.
-	return 0;
+	return (int) res;
 }
 
 /**
@@ -76,8 +77,7 @@ int get_child_process_count() {
 		: "0" (245)
 		: "memory"
 	);
-	return 0;
-	// return (int) res;
+	return (int) res;
 }
 
 #endif
