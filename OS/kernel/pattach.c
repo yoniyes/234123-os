@@ -4,7 +4,10 @@
  *	Yoni Yeshanov
  */
 
-// #include "pattach.h"
+#include <linux/types.h>
+#include <linux/kernel.h>
+#include <linux/list.h>
+#include <linux/sched.h>
 
 /**
  *
@@ -12,8 +15,7 @@
  *
  */
 int sys_attach_proc (pid_t PID) {
-	printk("PID:\t%d\n", PID);
-	return 0;
+	return (int) PID;
 }
 
 /**
@@ -23,7 +25,8 @@ int sys_attach_proc (pid_t PID) {
  */
 int sys_get_child_processes(pid_t* result, unsigned int max_length) {
 	int size = 0;
-	for (int i = 0; i < max_length; i++) {
+	int i;
+	for (i = 0; i < max_length; i++) {
 		result[i] = size++;
 	}
 	printk("result array size:\t%d, max_length:\t%d\n", size * sizeof(*result), max_length);
@@ -37,5 +40,19 @@ int sys_get_child_processes(pid_t* result, unsigned int max_length) {
  */
 int sys_get_child_process_count() {
 	printk("Got in.\n");
-	return 0;
+	//TODO: *********** list_entry(iterator, type, list head field name) ***********
+	struct task_struct *t = get_current()->p_cptr;
+	if (!t) {
+		return 0;
+	}
+	printk("Got youngest child.\n");
+	int res = 1;
+	struct task_struct *youngest = t;
+	while (t->p_osptr && (t->p_osptr != youngest)) {
+		res++;
+		t = t->p_osptr;
+		printk("Another child.\n");
+	}
+	return res;
 }
+
