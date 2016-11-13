@@ -44,7 +44,7 @@ int sys_get_child_process_count() {
 
 /**
  *
- *	TODO: Debug! not working...
+ *	Returns the number of child processes that were inserted to the @result array.
  *
  */
 int sys_get_child_processes(pid_t* result, unsigned int max_length) {
