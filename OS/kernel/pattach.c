@@ -8,6 +8,10 @@
 #include <linux/kernel.h>
 #include <linux/list.h>
 #include <linux/sched.h>
+#include <linux/errno.h>
+#include <linux/slab.h>
+
+#include <asm/uaccess.h>
 
 /**
  *
@@ -15,44 +19,65 @@
  *
  */
 int sys_attach_proc (pid_t PID) {
+	//TODO: *********** list_entry(iterator, type, list head field name) ***********
 	return (int) PID;
 }
 
 /**
  *
- *	Actual implementation.
- *
- */
-int sys_get_child_processes(pid_t* result, unsigned int max_length) {
-	int size = 0;
-	int i;
-	for (i = 0; i < max_length; i++) {
-		result[i] = size++;
-	}
-	printk("result array size:\t%d, max_length:\t%d\n", size * sizeof(*result), max_length);
-	return 0;
-}
-
-/**
- *
- *	Actual implementation.
+ *	Iterates over current process children and counts them.
  *
  */
 int sys_get_child_process_count() {
-	printk("Got in.\n");
-	//TODO: *********** list_entry(iterator, type, list head field name) ***********
 	struct task_struct *t = get_current()->p_cptr;
-	if (!t) {
+	if (!t) {	// If the process has no children.
 		return 0;
 	}
-	printk("Got youngest child.\n");
 	int res = 1;
 	struct task_struct *youngest = t;
 	while (t->p_osptr && (t->p_osptr != youngest)) {
 		res++;
 		t = t->p_osptr;
-		printk("Another child.\n");
 	}
 	return res;
 }
 
+/**
+ *
+ *	TODO: Debug! not working...
+ *
+ */
+int sys_get_child_processes(pid_t* result, unsigned int max_length) {
+	if (!result) {
+		return -EFAULT;
+	}
+	if (max_length == 0 || !get_current()->p_cptr) {
+		return 0;
+	}
+	int count = sys_get_child_process_count();
+	// printk("Child processes count:\t%d\n", count);
+	int size;
+	if (count < max_length) {
+		size = count;
+	} else {
+		size = max_length;
+	}
+	// printk("Size [min(max_length, count)]:\t%d\n", size);
+	pid_t* child_pids = (pid_t*) kmalloc( sizeof(pid_t) * size, GFP_KERNEL );
+	if (!child_pids) {
+		return -ENOMEM;
+	}
+	struct task_struct *t = get_current()->p_cptr;
+	int i;
+	for (i = 0; i < size; i++) {
+		// printk("PID %d:\t%d\n", i, t->pid);
+		child_pids[i] = t->pid;
+		t = t->p_osptr;
+	}
+	int num_of_bytes_not_copied = copy_to_user(result, child_pids, size * sizeof(pid_t));
+	kfree(child_pids);
+	if (num_of_bytes_not_copied != 0) {
+		return -EFAULT;
+	}
+	return size;
+}

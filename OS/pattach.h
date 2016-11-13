@@ -61,7 +61,7 @@ int get_child_processes(pid_t* result, unsigned int max_length) {
 		: "memory"
 	);
 	// TODO: Check @res value & @result and return.
-	return 0;
+	return res;
 }
 
 /**
