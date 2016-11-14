@@ -26,15 +26,21 @@ int sys_attach_proc (pid_t PID) {
 	if (!t) {	/*	PID doesn't exist	*/
 		return -ESRCH;
 	}
-	if (PID == get_current()->pid || PID == /* Any of current process' ancestors */) {
+	if (PID == 1) {	/*	If PID is INIT	*/
 		return -EINVAL;
 	}
-	int proc_euid = t->euid;
-	int curr_euid = get_current()->euid;
+	struct task_struct* iter = get_current();
+	while (iter && iter->pid != 1) {
+		if (iter->pid == PID) {	/*	If PID is an ancestor of current (or current itself)	*/
+			return -EINVAL;
+		}
+		iter = iter->p_opptr;
+	}
+	int proc_euid = t->euid, curr_euid = get_current()->euid;
 	if (curr_euid != 0 && curr_euid != proc_euid) {	/*	User is not root and not process owner	*/
 		return -EPERM;
 	}
-	if (t->p_opptr->/*waiting for PID*/) {	/*	The father is waiting for PID	*/
+	if (t->p_opptr->/*waiting for PID*/) {	/*	The father is waiting for PID [wait() or waitpid(PID)]	*/
 		return -EBUSY;
 	}
 	//TODO: add a dedicated field in task_struct for this syscall.
