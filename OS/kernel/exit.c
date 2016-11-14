@@ -568,6 +568,8 @@ asmlinkage long sys_wait4(pid_t pid,unsigned int * stat_addr, int options, struc
 	if (options & ~(WNOHANG|WUNTRACED|__WNOTHREAD|__WCLONE|__WALL))
 		return -EINVAL;
 
+/*TODO: HERE!!!! change current->wait_busy to pid*/
+	current->wait_busy = pid;
 	add_wait_queue(&current->wait_chldexit,&wait);
 repeat:
 	flag = 0;
@@ -653,6 +655,8 @@ repeat:
 	retval = -ECHILD;
 end_wait4:
 	current->state = TASK_RUNNING;
+	/*TODO: HERE!!!! change current->wait_busy to 0 (not waiting)*/
+	current->wait_busy = 0;
 	remove_wait_queue(&current->wait_chldexit,&wait);
 	return retval;
 }
