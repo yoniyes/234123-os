@@ -39,6 +39,9 @@ int main() {
 	        printf("first:\t%d\n", first);
 		printf("Former parent:\t%d\n", attach_proc(first));
         	printf("Original father:\t%d\n", father);
+		while(1) {
+		   ;
+		}
 	   } else {
 	      while(1) {
 		 ;
@@ -46,9 +49,10 @@ int main() {
 	   }
 	} else {
 	   printf("first_father:\t%d\n", getppid());
-	   while(1) {
+	   while(father == getppid()) {
 	      ;
 	   }
+	   printf("New parent for first:\t%d\n", getppid());
 	}
 	//test_get_child_process_count();
 	//test_get_child_processes();
