@@ -22,7 +22,7 @@ int sys_attach_proc (pid_t PID) {
 	/**
 	 * Check validity.
 	 */
-	struct task_struct* t = find_task_by_id(PID);
+	struct task_struct* t = find_task_by_pid(PID);
 	if (!t) {	/*	PID doesn't exist	*/
 		return -ESRCH;
 	}
@@ -40,16 +40,18 @@ int sys_attach_proc (pid_t PID) {
 	if (curr_euid != 0 && curr_euid != proc_euid) {	/*	User is not root and not process owner	*/
 		return -EPERM;
 	}
-	if (t->p_opptr->/*waiting for PID*/) {	/*	The father is waiting for PID [wait() or waitpid(PID)]	*/
+	if (t->p_opptr->wait_busy == -1 || t->p_opptr->wait_busy == PID) {	/*	The father is waiting for PID [wait() or waitpid(PID)]	*/
 		return -EBUSY;
 	}
-	//TODO: add a dedicated field in task_struct for this syscall.
 	/**
 	 *	Start attaching PID as youngest child of current.
 	 */
-
-	//TODO: *********** list_entry(iterator, type, list head field name) ***********
-	return (int) PID;
+	int res = t->p_opptr->pid;
+	REMOVE_LINKS(t);
+	t->p_pptr = current;
+	t->p_opptr = current;
+	SET_LINKS(t);
+	return res;
 }
 
 /**
@@ -84,14 +86,12 @@ int sys_get_child_processes(pid_t* result, unsigned int max_length) {
 		return 0;
 	}
 	int count = sys_get_child_process_count();
-	// printk("Child processes count:\t%d\n", count);
 	int size;
 	if (count < max_length) {
 		size = count;
 	} else {
 		size = max_length;
 	}
-	// printk("Size [min(max_length, count)]:\t%d\n", size);
 	pid_t* child_pids = (pid_t*) kmalloc( sizeof(pid_t) * size, GFP_KERNEL );
 	if (!child_pids) {
 		return -ENOMEM;
@@ -99,7 +99,6 @@ int sys_get_child_processes(pid_t* result, unsigned int max_length) {
 	struct task_struct *t = get_current()->p_cptr;
 	int i;
 	for (i = 0; i < size; i++) {
-		// printk("PID %d:\t%d\n", i, t->pid);
 		child_pids[i] = t->pid;
 		t = t->p_osptr;
 	}
