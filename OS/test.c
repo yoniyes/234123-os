@@ -29,10 +29,29 @@ void test_get_child_processes() {
 }
 
 int main() {
-	// printf("Testing [ attach_proc ] ...\n");
-	// printf("PID:\t%d\n", attach_proc(1234));
-	test_get_child_process_count();
-	test_get_child_processes();
+	printf("Testing [ attach_proc ] ...\n");
+	int father = getpid();
+	printf("\n\n%d\n\n", father);
+	int first = fork(), second;
+	if (first != 0) {
+	   second = fork();
+	   if (second == 0) {
+	        printf("first:\t%d\n", first);
+		printf("Former parent:\t%d\n", attach_proc(first));
+        	printf("Original father:\t%d\n", father);
+	   } else {
+	      while(1) {
+		 ;
+	      }
+	   }
+	} else {
+	   printf("first_father:\t%d\n", getppid());
+	   while(1) {
+	      ;
+	   }
+	}
+	//test_get_child_process_count();
+	//test_get_child_processes();
 	// printf("Finished\n");
 	return 0;
 }
