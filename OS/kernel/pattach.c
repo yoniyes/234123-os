@@ -19,6 +19,29 @@
  *
  */
 int sys_attach_proc (pid_t PID) {
+	/**
+	 * Check validity.
+	 */
+	struct task_struct* t = find_task_by_id(PID);
+	if (!t) {	/*	PID doesn't exist	*/
+		return -ESRCH;
+	}
+	if (PID == get_current()->pid || PID == /* Any of current process' ancestors */) {
+		return -EINVAL;
+	}
+	int proc_euid = t->euid;
+	int curr_euid = get_current()->euid;
+	if (curr_euid != 0 && curr_euid != proc_euid) {	/*	User is not root and not process owner	*/
+		return -EPERM;
+	}
+	if (t->p_opptr->/*waiting for PID*/) {	/*	The father is waiting for PID	*/
+		return -EBUSY;
+	}
+	//TODO: add a dedicated field in task_struct for this syscall.
+	/**
+	 *	Start attaching PID as youngest child of current.
+	 */
+
 	//TODO: *********** list_entry(iterator, type, list head field name) ***********
 	return (int) PID;
 }
