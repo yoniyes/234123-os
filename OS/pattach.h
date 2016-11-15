@@ -8,6 +8,7 @@
 #define _PATTACH_H_
 
 #include <linux/types.h>
+#include <errno.h>
 
 /**	WRAPPER TEMPLATE
 
@@ -43,6 +44,10 @@ int attach_proc (pid_t PID) {
 		: "memory"										// Clobber list.
 	);
 	// TODO: Check @res value and return.
+	if (res >= (unsigned long)(-125)) {
+		errno = -res;
+		res = -1;
+	}
 	return (int) res;
 }
 
@@ -61,7 +66,11 @@ int get_child_processes(pid_t* result, unsigned int max_length) {
 		: "memory"
 	);
 	// TODO: Check @res value & @result and return.
-	return res;
+	if (res >= (unsigned long)(-125)) {
+		errno = -res;
+		res = -1;
+	}
+	return  (int) res;
 }
 
 /**
