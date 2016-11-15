@@ -7,7 +7,7 @@
 #ifndef _PATTACH_H_
 #define _PATTACH_H_
 
-#include <linux/types.h>
+#include <sys/types.h>
 #include <errno.h>
 
 /**	WRAPPER TEMPLATE
