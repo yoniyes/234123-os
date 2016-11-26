@@ -14,7 +14,7 @@ int sys_is_short(pid_t pid) {
 	if (t->policy != SCHED_SHORT) {
 		return -EINVAL;
 	} else if (t->is_short == -1) {
-			return 0;
+		return 0;
 	}
 	return 1;
 }
