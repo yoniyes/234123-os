@@ -131,6 +131,7 @@ struct sched_param {
 	int requested_time;
 };
 
+
 struct completion;
 
 #ifdef __KERNEL__

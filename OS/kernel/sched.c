@@ -1173,7 +1173,6 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	unsigned long flags;
 	runqueue_t *rq;
 	task_t *p;
-
 	if (!param || pid < 0)
 		goto out_nounlock;
 
@@ -1214,12 +1213,16 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	retval = -EINVAL;
 	if (lp.sched_priority < 0 || lp.sched_priority > MAX_USER_RT_PRIO-1)
 		goto out_unlock;
+	printk("policy = %d\nSCHED_SHORT = %d\nlp.sched_priority = %d\n", policy, SCHED_SHORT, lp.sched_priority);
 	//if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
 	if ((policy == SCHED_OTHER || policy == SCHED_SHORT) != (lp.sched_priority == 0)) // HW2 SHORT policy added
 		goto out_unlock;
+	printk("5\n");
+	/*TODO: FAILS HERE!!!*/
 	if (lp.requested_time < (p->requested_time - p->time_slice) * 1000 / HZ || lp.requested_time > 3000) { // HW2 SHORT policy added
 		goto out_unlock;
 	}
+	printk("out\n");
 
 	retval = -EPERM;
 	if ((policy == SCHED_FIFO || policy == SCHED_RR) &&
