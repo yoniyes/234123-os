@@ -4,6 +4,14 @@
 		"selected_items":
 		[
 			[
+				"wait",
+				"wait_busy"
+			],
+			[
+				"if",
+				"if\tIf Condition"
+			],
+			[
 				"no",
 				"not_copied"
 			],
@@ -31,25 +39,7 @@
 			"file": "pattach.h",
 			"settings":
 			{
-				"buffer_size": 1502,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "kernel/pattach.c",
-			"settings":
-			{
-				"buffer_size": 1526,
-				"encoding": "UTF-8",
-				"line_ending": "Windows"
-			}
-		},
-		{
-			"file": "test.c",
-			"settings":
-			{
-				"buffer_size": 805,
+				"buffer_size": 1664,
 				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
@@ -64,18 +54,38 @@
 			}
 		},
 		{
+			"file": "kernel/pattach.c",
+			"settings":
+			{
+				"buffer_size": 2411,
+				"encoding": "UTF-8",
+				"line_ending": "Windows"
+			}
+		},
+		{
 			"file": "kernel/exit.c",
 			"settings":
 			{
-				"buffer_size": 16093,
+				"buffer_size": 16262,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "include/linux/sched.h",
+			"settings":
+			{
+				"buffer_size": 28900,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
 			}
 		},
 		{
 			"file": "kernel/fork.c",
 			"settings":
 			{
-				"buffer_size": 20895,
+				"buffer_size": 20947,
+				"encoding": "UTF-8",
 				"line_ending": "Windows"
 			}
 		}
@@ -120,10 +130,15 @@
 		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/arch",
 		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/arch/i386",
 		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/arch/i386/kernel",
+		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/include",
+		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/include/linux",
 		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/kernel"
 	],
 	"file_history":
 	[
+		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/test.c",
+		"/C/Users/yyeshano/Downloads/test.c",
+		"/C/Users/yyeshano/Documents/GitHub/234123-os/OS/kernel/sched.c",
 		"/C/Users/yyeshano/Documents/234123-os/OS/kernel/exit.c",
 		"/C/Users/yyeshano/Documents/234123-os/OS/arch/i386/kernel/entry.S",
 		"/C/Users/yyeshano/Documents/234123-os/OS/kernel/pattach.c",
@@ -153,6 +168,14 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"wait_busy",
+			"p>tty_old_pgrp",
+			"next_task",
+			"task_struct",
+			"struct task_struct",
+			"sys_wait",
+			"waitpid",
+			"kfree"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -170,7 +193,7 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 2,
 			"sheets":
 			[
 				{
@@ -179,15 +202,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1502,
+						"buffer_size": 1664,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1502,
-								1502
+								111,
+								111
 							]
 						],
 						"settings":
@@ -196,72 +219,14 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 607.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 2,
+					"stack_index": 4,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "kernel/pattach.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1526,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								784,
-								784
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 478.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
-					"file": "test.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 805,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								338,
-								338
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C.sublime-syntax",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
 					"file": "arch/i386/kernel/entry.S",
 					"semi_transient": false,
 					"settings":
@@ -273,8 +238,8 @@
 						"selection":
 						[
 							[
-								18007,
-								18007
+								8526,
+								8534
 							]
 						],
 						"settings":
@@ -283,27 +248,27 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 9217.0,
+						"translation.y": 5749.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 4,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "kernel/exit.c",
+					"buffer": 2,
+					"file": "kernel/pattach.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 16093,
+						"buffer_size": 2411,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								507,
+								507
 							]
 						],
 						"settings":
@@ -315,7 +280,65 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "kernel/exit.c",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16262,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								15828,
+								15837
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 9499.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "include/linux/sched.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 28900,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								26806,
+								26806
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 6226.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
@@ -324,15 +347,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 20895,
+						"buffer_size": 20947,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								15569,
+								15578
 							]
 						],
 						"settings":
@@ -341,7 +364,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 9319.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
