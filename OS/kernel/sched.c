@@ -800,9 +800,11 @@ void scheduler_tick(int user_tick, int system)
 			p->first_time_slice = 0;
 			if (p->is_short == 1) {
 				p->time_slice = 2 * p->requested_time;
-				enqueue_task(p, rq->overdue);
+				p->is_short = -1;
+				enqueue_task(p, &rq->overdue);
 			} else {
 				p->time_slice = TASK_TIMESLICE(p);
+				p->policy = SCHED_OTHER;
 				enqueue_task(p, rq->active);
 			}
 		}
@@ -1233,6 +1235,13 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	if (array)
 		deactivate_task(p, task_rq(p));
 	retval = 0;
+	
+	// HW2 added SHORT policy.
+	p->requested_time = lp.requested_time * HZ / 1000;
+	if (p->policy != SCHED_SHORT && policy == SCHED_SHORT) {
+		p->is_short = 1;
+	}
+
 	p->policy = policy;
 	p->rt_priority = lp.sched_priority;
 	if (policy != SCHED_OTHER && policy != SCHED_SHORT)
@@ -1678,9 +1687,9 @@ void __init sched_init(void)
 		}
 		// HW2 struct init.
 		for (j = 0; j < MAX_PRIO; j++) {
-			INIT_LIST_HEAD(&(rq->short_active.queue) + j);
+			INIT_LIST_HEAD(rq->short_active.queue + j);
 			__clear_bit(j, rq->short_active.bitmap);
-			INIT_LIST_HEAD(&(rq->overdue.queue) + j);
+			INIT_LIST_HEAD(rq->overdue.queue + j);
 			__clear_bit(j, rq->overdue.bitmap);
 		}
 		__set_bit(MAX_PRIO, rq->short_active.bitmap);
