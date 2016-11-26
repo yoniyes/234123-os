@@ -122,11 +122,13 @@ extern unsigned long nr_uninterruptible(void);
 /**
  * TODO: INSERT HERE THE NEW POLICY DEFINITION.
  */
+#define SCHED_SHORT		5
 
    
 struct sched_param {
 	int sched_priority;
 	//INSERT HERE requested_time FIELD.
+	int requested_time;
 };
 
 struct completion;
@@ -456,6 +458,11 @@ struct task_struct {
 
 /* journalling filesystem info */
 	void *journal_info;
+	/**
+	 * HW2 fields.
+	 */
+	int is_short;
+	int requested_time;
 };
 
 /*

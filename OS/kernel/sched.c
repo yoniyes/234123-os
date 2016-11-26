@@ -142,6 +142,10 @@ struct runqueue {
 	int prev_nr_running[NR_CPUS];
 	task_t *migration_thread;
 	list_t migration_queue;
+	/**
+	 * HW2 SHORT and OVERDUE prio arrays.
+	 */
+	prio_array_t short_active, overdue;
 } ____cacheline_aligned;
 
 static struct runqueue runqueues[NR_CPUS] __cacheline_aligned;
@@ -255,7 +259,12 @@ static inline int effective_prio(task_t *p)
 static inline void activate_task(task_t *p, runqueue_t *rq)
 {
 	unsigned long sleep_time = jiffies - p->sleep_timestamp;
-	prio_array_t *array = rq->active;
+	prio_array_t *array;
+	if (p->policy == SCHED_SHORT) { // HW2 added SHORT policy
+		array = (p->is_short > 0) ? &(rq->short_active) : &(rq->overdue);
+	} else {
+		array = rq->active;
+	}
 
 	if (!rt_task(p) && sleep_time) {
 		/*
@@ -739,7 +748,8 @@ void scheduler_tick(int user_tick, int system)
 	kstat.per_cpu_system[cpu] += system;
 
 	/* Task might have expired already, but not scheduled off yet */
-	if (p->array != rq->active) {
+	// if (p->array != rq->active) {
+	if (p->array != rq->active && p->array != &(rq->short_active) && p->array != &(rq->overdue)) { // HW2 added SHORT policy.
 		set_tsk_need_resched(p);
 		return;
 	}
@@ -771,18 +781,31 @@ void scheduler_tick(int user_tick, int system)
 	if (p->sleep_avg)
 		p->sleep_avg--;
 	if (!--p->time_slice) {
-		dequeue_task(p, rq->active);
-		set_tsk_need_resched(p);
-		p->prio = effective_prio(p);
-		p->first_time_slice = 0;
-		p->time_slice = TASK_TIMESLICE(p);
+		if (p->policy != SCHED_SHORT) { 
+			dequeue_task(p, rq->active);
+			set_tsk_need_resched(p);
+			p->prio = effective_prio(p);
+			p->first_time_slice = 0;
+			p->time_slice = TASK_TIMESLICE(p);
 
-		if (!TASK_INTERACTIVE(p) || EXPIRED_STARVING(rq)) {
-			if (!rq->expired_timestamp)
-				rq->expired_timestamp = jiffies;
-			enqueue_task(p, rq->expired);
-		} else
-			enqueue_task(p, rq->active);
+			if (!TASK_INTERACTIVE(p) || EXPIRED_STARVING(rq)) {
+				if (!rq->expired_timestamp)
+					rq->expired_timestamp = jiffies;
+				enqueue_task(p, rq->expired);
+			} else
+				enqueue_task(p, rq->active);
+		} else { // HW2 added SHORT policy
+			dequeue_task(p, p->array);
+			p->prio = effective_prio(p);
+			p->first_time_slice = 0;
+			if (p->is_short == 1) {
+				p->time_slice = 2 * p->requested_time;
+				enqueue_task(p, rq->overdue);
+			} else {
+				p->time_slice = TASK_TIMESLICE(p);
+				enqueue_task(p, rq->active);
+			}
+		}
 	}
 out:
 #if CONFIG_SMP
@@ -851,6 +874,17 @@ pick_next_task:
 		rq->expired = array;
 		array = rq->active;
 		rq->expired_timestamp = 0;
+	}
+
+	// if (rq->short_active.nr_active) { // HW2 added SHORT policy.
+	// 	array = &(rq->short_active);
+	// }
+	if (!array->nr_active) {
+		if (rq->short_active.nr_active) { // HW2 added SHORT policy.
+			array = &(rq->short_active);
+		} else {
+			array = &(rq->overdue);
+		}
 	}
 
 	idx = sched_find_first_bit(array->bitmap);
@@ -1167,7 +1201,7 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	else {
 		retval = -EINVAL;
 		if (policy != SCHED_FIFO && policy != SCHED_RR &&
-				policy != SCHED_OTHER)
+				policy != SCHED_OTHER && policy != SCHED_SHORT) // HW2 SHORT policy added
 			goto out_unlock;
 	}
 
@@ -1178,8 +1212,12 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	retval = -EINVAL;
 	if (lp.sched_priority < 0 || lp.sched_priority > MAX_USER_RT_PRIO-1)
 		goto out_unlock;
-	if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
+	//if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
+	if ((policy == SCHED_OTHER || policy == SCHED_SHORT) != (lp.sched_priority == 0)) // HW2 SHORT policy added
 		goto out_unlock;
+	if (lp.requested_time < (p->requested_time - p->time_slice) * 1000 / HZ || lp.requested_time > 3000) { // HW2 SHORT policy added
+		goto out_unlock;
+	}
 
 	retval = -EPERM;
 	if ((policy == SCHED_FIFO || policy == SCHED_RR) &&
@@ -1188,14 +1226,16 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	if ((current->euid != p->euid) && (current->euid != p->uid) &&
 	    !capable(CAP_SYS_NICE))
 		goto out_unlock;
-
+	if (p->policy == SCHED_SHORT && policy != SCHED_SHORT) {  // HW2 SHORT policy added
+		goto out_unlock;
+	}
 	array = p->array;
 	if (array)
 		deactivate_task(p, task_rq(p));
 	retval = 0;
 	p->policy = policy;
 	p->rt_priority = lp.sched_priority;
-	if (policy != SCHED_OTHER)
+	if (policy != SCHED_OTHER && policy != SCHED_SHORT)
 		p->prio = MAX_USER_RT_PRIO-1 - p->rt_priority;
 	else
 		p->prio = p->static_prio;
@@ -1256,6 +1296,7 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
 	if (!p)
 		goto out_unlock;
 	lp.sched_priority = p->rt_priority;
+	lp.requested_time = p->requested_time * 1000 / HZ; // HW2 added SHORT policy
 	read_unlock(&tasklist_lock);
 
 	/*
@@ -1635,6 +1676,15 @@ void __init sched_init(void)
 			// delimiter for bitsearch
 			__set_bit(MAX_PRIO, array->bitmap);
 		}
+		// HW2 struct init.
+		for (j = 0; j < MAX_PRIO; j++) {
+			INIT_LIST_HEAD(&(rq->short_active.queue) + j);
+			__clear_bit(j, rq->short_active.bitmap);
+			INIT_LIST_HEAD(&(rq->overdue.queue) + j);
+			__clear_bit(j, rq->overdue.bitmap);
+		}
+		__set_bit(MAX_PRIO, rq->short_active.bitmap);
+		__set_bit(MAX_PRIO, rq->overdue.bitmap);
 	}
 	/*
 	 * We have to do a little magic to get the first
