@@ -261,12 +261,18 @@ static inline void activate_task(task_t *p, runqueue_t *rq)
 	unsigned long sleep_time = jiffies - p->sleep_timestamp;
 	prio_array_t *array;
 	if (p->policy == SCHED_SHORT) { // HW2 added SHORT policy
-		array = (p->is_short > 0) ? &(rq->short_active) : &(rq->overdue);
+		if(p->is_short == 1) {
+			array = &(rq->short_active);
+		}
+		else
+		{
+			array = &(rq->overdue);
+		}
 	} else {
 		array = rq->active;
 	}
 
-	if (!rt_task(p) && sleep_time) {
+	if (!rt_task(p) && sleep_time && p->policy != SCHED_SHORT) {
 		/*
 		 * This code gives a bonus to interactive tasks. We update
 		 * an 'average sleep time' value here, based on
@@ -796,15 +802,19 @@ void scheduler_tick(int user_tick, int system)
 				enqueue_task(p, rq->active);
 		} else { // HW2 added SHORT policy
 			dequeue_task(p, p->array);
-			p->prio = effective_prio(p);
+			set_tsk_need_resched(p);//Nadav
 			p->first_time_slice = 0;
 			if (p->is_short == 1) {
+				p->prio = MAX_PRIO-1;//all overdue proccess need to be in the same prio
 				p->time_slice = 2 * p->requested_time;
 				p->is_short = -1;
+				//p->prio = p->static_prio;
+				p->requested_time = 2 * p->requested_time;
 				enqueue_task(p, &rq->overdue);
 			} else {
 				p->time_slice = TASK_TIMESLICE(p);
 				p->policy = SCHED_OTHER;
+				p->prio = effective_prio(p);//NADAV
 				enqueue_task(p, rq->active);
 			}
 		}
@@ -881,6 +891,7 @@ pick_next_task:
 	// if (rq->short_active.nr_active) { // HW2 added SHORT policy.
 	// 	array = &(rq->short_active);
 	// }
+
 	if (!array->nr_active) {
 		if (rq->short_active.nr_active) { // HW2 added SHORT policy.
 			array = &(rq->short_active);
@@ -902,6 +913,8 @@ switch_tasks:
 		rq->curr = next;
 	
 		prepare_arch_switch(rq);
+		if((prev->pid > 1000 && next->pid > 1000 ) && ((prev->policy == SCHED_SHORT && next->policy == SCHED_OTHER) || (prev->policy == SCHED_OTHER && next->policy == SCHED_SHORT) || (prev->policy == SCHED_SHORT && next->policy == SCHED_SHORT)))
+			printk(" ;pid %d change to %d; ", prev->pid, next->pid);//Nadav, HW2, delete
 		prev = context_switch(prev, next);
 		barrier();
 		rq = this_rq();
@@ -1087,6 +1100,7 @@ void set_user_nice(task_t *p, long nice)
 	array = p->array;
 	if (array)
 		dequeue_task(p, array);
+	int static_prio_old = p->static_prio;//HW2, Nadav
 	p->static_prio = NICE_TO_PRIO(nice);
 	p->prio = NICE_TO_PRIO(nice);
 	if (array) {
@@ -1095,7 +1109,8 @@ void set_user_nice(task_t *p, long nice)
 		 * If the task is running and lowered its priority,
 		 * or increased its priority then reschedule its CPU:
 		 */
-		if ((NICE_TO_PRIO(nice) < p->static_prio) || (p == rq->curr))
+		//if ((NICE_TO_PRIO(nice) < p->static_prio) || (p == rq->curr)) //old line
+		if ((NICE_TO_PRIO(nice) < static_prio_old) || (p == rq->curr)) //HW2, Nadav. fixed kernel bug, now resched_task if needed
 			resched_task(rq->curr);
 	}
 out_unlock:
@@ -1213,16 +1228,22 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	retval = -EINVAL;
 	if (lp.sched_priority < 0 || lp.sched_priority > MAX_USER_RT_PRIO-1)
 		goto out_unlock;
-	printk("policy = %d\nSCHED_SHORT = %d\nlp.sched_priority = %d\n", policy, SCHED_SHORT, lp.sched_priority);
 	//if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
-	if ((policy == SCHED_OTHER || policy == SCHED_SHORT) != (lp.sched_priority == 0)) // HW2 SHORT policy added
+	//if ((policy == SCHED_OTHER || policy == SCHED_SHORT) != (lp.sched_priority == 0)) // HW2 SHORT policy added
+	//Nadav, i think that other must have priority 0, but SHORT don't care from this.. so 
+	if (policy != SCHED_SHORT && (policy == SCHED_OTHER != lp.sched_priority == 0))// HW2
 		goto out_unlock;
-	printk("5\n");
-	/*TODO: FAILS HERE!!!*/
-	if (lp.requested_time < (p->requested_time - p->time_slice) * 1000 / HZ || lp.requested_time > 3000) { // HW2 SHORT policy added
-		goto out_unlock;
+	//if (lp.requested_time < (p->requested_time - p->time_slice) * 1000 / HZ || lp.requested_time > 3000) { // HW2 SHORT policy added
+	//Nadav, the claculation we did relevant just for current short policy, if it is other we don't care.
+
+	//printk("p->policy %d\n lp.requested_time %d\n p->requested_time %d\n p->time_slice %d\n HZ = %d\n",p->policy, lp.requested_time, p->requested_time,  p->time_slice, HZ );
+	if(policy == SCHED_SHORT) {
+		if((p->policy == SCHED_SHORT && lp.requested_time <= ((p->requested_time - p->time_slice) * 1000 / HZ)) ||  
+			lp.requested_time > 3000 ||  
+			lp.requested_time < 1)
+			goto out_unlock;
 	}
-	printk("out\n");
+	
 
 	retval = -EPERM;
 	if ((policy == SCHED_FIFO || policy == SCHED_RR) &&
@@ -1234,15 +1255,33 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	if (p->policy == SCHED_SHORT && policy != SCHED_SHORT) {  // HW2 SHORT policy added
 		goto out_unlock;
 	}
+	if (p->policy == SCHED_SHORT && p->is_short == -1) {  // HW2 SHORT policy added, can't change overdue process, Nadav
+		goto out_unlock;
+	}
+	if (policy == SCHED_SHORT &&  p->policy != SCHED_OTHER && p->policy != SCHED_SHORT ) {  // HW2 only other can changed to sort Nadav
+		goto out_unlock;
+	}
 	array = p->array;
 	if (array)
 		deactivate_task(p, task_rq(p));
 	retval = 0;
 	
 	// HW2 added SHORT policy.
-	p->requested_time = lp.requested_time * HZ / 1000;
-	if (p->policy != SCHED_SHORT && policy == SCHED_SHORT) {
-		p->is_short = 1;
+
+	//Nadav
+	if ( policy == SCHED_SHORT) {
+		if (p->policy != SCHED_SHORT) {//if new short
+			p->is_short = 1;
+			p->requested_time = lp.requested_time * HZ / 1000;
+			p->time_slice = p->requested_time;
+		} else  {//if old short but not overdue, we already stoped for overdue
+			p->time_slice = (lp.requested_time * HZ / 1000) - (p->requested_time - p->time_slice);//new time less time that already used
+			p->requested_time = (lp.requested_time * HZ / 1000);
+		}
+		if (p->requested_time == 0)
+			p->requested_time = 1;
+		if (p->time_slice == 0)// not always same as request time
+			p->time_slice = 1;
 	}
 
 	p->policy = policy;
@@ -1654,6 +1693,8 @@ void __init init_idle(task_t *idle, int cpu)
 	idle->array = NULL;
 	idle->prio = MAX_PRIO;
 	idle->state = TASK_RUNNING;
+	idle->requested_time = 0; //HW2, Nadav
+	idle->is_short = 0; //HW2, Nadav
 	idle->cpu = cpu;
 	double_rq_unlock(idle_rq, rq);
 	set_tsk_need_resched(idle);
