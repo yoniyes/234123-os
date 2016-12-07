@@ -652,6 +652,7 @@ extern long FASTCALL(interruptible_sleep_on_timeout(wait_queue_head_t *q,
 						    signed long timeout));
 extern int FASTCALL(wake_up_process(task_t * tsk));
 extern void FASTCALL(wake_up_forked_process(task_t * tsk));
+extern void FASTCALL(wake_up_short_forked_process(task_t * tsk, task_t * tskf));//HW2, Nadav
 extern void FASTCALL(sched_exit(task_t * p));
 
 #define wake_up(x)			__wake_up((x),TASK_UNINTERRUPTIBLE | TASK_INTERRUPTIBLE, 1)
