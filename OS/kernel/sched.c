@@ -849,10 +849,11 @@ void scheduler_tick(int user_tick, int system)
 			p->first_time_slice = 0;
 			if (p->is_short == 1) {
 				p->prio = MAX_PRIO-1;//all overdue proccess need to be in the same prio
-				p->time_slice = 2 * p->requested_time;
+				// p->time_slice = 2 * p->requested_time;
+				p->time_slice = 2 * p->requested_time * HZ / 1000; //Yoni.
 				p->is_short = -1;
 				//p->prio = p->static_prio;
-				p->requested_time = 2 * p->requested_time;
+				// p->requested_time = 2 * p->requested_time; //Yoni. requested time is the same. only time_slice is doubled and the penalty is running as last.
 				enqueue_task(p, &rq->overdue);
 			} else {
 				p->time_slice = TASK_TIMESLICE(p);
@@ -1284,7 +1285,8 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 
 	//printk("p->policy %d\n lp.requested_time %d\n p->requested_time %d\n p->time_slice %d\n HZ = %d\n",p->policy, lp.requested_time, p->requested_time,  p->time_slice, HZ );
 	if(policy == SCHED_SHORT) {
-		if((p->policy == SCHED_SHORT && lp.requested_time <= ((p->requested_time - p->time_slice) * 1000 / HZ)) ||  
+		// if((p->policy == SCHED_SHORT && lp.requested_time <= ((p->requested_time - p->time_slice) * 1000 / HZ)) ||  
+		if((p->policy == SCHED_SHORT && (lp.requested_time <= p->requested_time - (p->time_slice * 1000 / HZ))) ||  //Yoni.
 			lp.requested_time > 3000 ||  
 			lp.requested_time < 1)
 			goto out_unlock;
@@ -1318,12 +1320,16 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	if ( policy == SCHED_SHORT) {
 		if (p->policy != SCHED_SHORT) {//if new short
 			p->is_short = 1;
-			p->requested_time = lp.requested_time * HZ / 1000;
-			p->time_slice = p->requested_time;
+			// p->requested_time = lp.requested_time * HZ / 1000; //In jiffies
+			p->requested_time = lp.requested_time; //Yoni. In ms.
+			// p->time_slice = p.requested_time;
+			p->time_slice = lp.requested_time * HZ / 1000; //Yoni. still in jiffies.
 			set_tsk_need_resched(p);//Nadav
 		} else  {//if old short but not overdue, we already stoped for overdue
-			p->time_slice = (lp.requested_time * HZ / 1000) - (p->requested_time - p->time_slice);//new time less time that already used
-			p->requested_time = (lp.requested_time * HZ / 1000);
+			// p->time_slice = (lp.requested_time * HZ / 1000) - (p->requested_time - p->time_slice);//new time less time that already used
+			p->time_slice = (lp.requested_time * HZ / 1000) - ((p->requested_time * HZ / 1000) - p->time_slice); // Yoni.
+			// p->requested_time = (lp.requested_time * HZ / 1000);
+			p->requested_time = lp.requested_time; //Yoni.
 		}
 		if (p->requested_time == 0)
 			p->requested_time = 1;
@@ -1394,7 +1400,8 @@ asmlinkage long sys_sched_getparam(pid_t pid, struct sched_param *param)
 	if (!p)
 		goto out_unlock;
 	lp.sched_priority = p->rt_priority;
-	lp.requested_time = p->requested_time * 1000 / HZ; // HW2 added SHORT policy
+	// lp.requested_time = p->requested_time * 1000 / HZ; // HW2 added SHORT policy
+	lp.requested_time = p->requested_time; //Yoni
 	read_unlock(&tasklist_lock);
 
 	/*
