@@ -194,7 +194,7 @@ int main() {
 	if(son_1 == 0) {
 
 		sched_setscheduler(getpid(), SCHED_SHORT, &shorty);
-		i_time = 0; while(i_time<2000) {i_time++;}
+		//i_time = 0; while(i_time<2000) {i_time++;}
 		printf( ANSI_COLOR_CYAN "I am the 1 short"  " errno = %d\n" ANSI_COLOR_RESET, errno);
 		printf( "check if 1 proccess is SHORT \n");
 		if (is_short(getpid()) == 1)
@@ -208,14 +208,14 @@ int main() {
 
 		printf( "fork first short, remain time to overdur %d\n", short_remaining_time(getpid()));
 		int short_son = fork();
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 		if(short_son == 0) {
 			printf( "i am short son, remain time to overdur %d\n", short_remaining_time(getpid()));
 			while(is_short(getpid())==1);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 			printf( "i am short son that overdue %d, remain time to other %d\n",is_short(getpid()), short_remaining_time(getpid()));
 			while(is_short(getpid())==-1);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 			printf( "i am 1 short son overdue that become other %d,\n",is_short(getpid()));
 
 
@@ -223,10 +223,36 @@ int main() {
 		else {
 			printf( "i am 1 short after fork %d, remain time to overdur %d\n", short_son, short_remaining_time(getpid()));
 			while(is_short(getpid())==1);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 			printf( "i am 1 short that overdue %d, remain time to other %d\n",is_short(getpid()), short_remaining_time(getpid()));
+			printf( "fork first short when ovredue, remain time to other %d\n", short_remaining_time(getpid()));
+			int short_sec_son = fork();
+			if(short_sec_son == 0 ){
+
+				printf( "i am short overdue son, remain time to other %d\n", short_remaining_time(getpid()));
+				errno = 0;
+				printf( "check if forked overdue also overdue \n");
+				if (is_short(getpid()) == 0)
+				{	
+					printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);
+				}
+				else
+				{
+					printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);
+				}
+
+				while(is_short(getpid())==-1);
+				printf( "i am 1 overdue short son that become other %d,\n",is_short(getpid()));
+
+				exit();
+			}
+			else {
+			printf( "i am 1 short overdue after fork %d, remain time to other %d\n", short_son, short_remaining_time(getpid()));
+
+			}
+
 			while(is_short(getpid())==-1);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 			printf( "i am 1 short overdue that become other %d,\n",is_short(getpid()));
 		}
 		exit();
@@ -236,7 +262,7 @@ int main() {
 	if(son_2 == 0) {
 
 		sched_setscheduler(getpid(), SCHED_SHORT, &shorty);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 		printf( ANSI_COLOR_CYAN "I am the 2 short"  " errno = %d\n" ANSI_COLOR_RESET, errno);
 		printf( "check if 2 proccess is SHORT \n");
 		if (is_short(getpid()) == 1)
@@ -256,7 +282,7 @@ int main() {
 
 		shorty.sched_priority = 0;
 		sched_setscheduler(getpid(), SCHED_OTHER, &shorty);
-		i_time = 0; while(i_time<2000) {i_time++;}
+		//i_time = 0; while(i_time<2000) {i_time++;}
 		printf( ANSI_COLOR_CYAN "I am the 1 OTHER"  " errno = %d\n" ANSI_COLOR_RESET, errno);
 		printf( "check if 1 other proccess is not SHORT \n");
 		if (is_short(getpid()) == -1)
@@ -276,7 +302,7 @@ int main() {
 	if(son_4 == 0) {
 
 		sched_setscheduler(getpid(), SCHED_SHORT, &shorty);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 		printf( ANSI_COLOR_CYAN "I am the 3 short"  " errno = %d\n" ANSI_COLOR_RESET, errno);
 		printf( "check if 3 proccess is SHORT  \n");
 		if (is_short(getpid()) == 1)
@@ -296,7 +322,7 @@ int main() {
 	if(son_5 == 0) {
 
 		sched_setscheduler(getpid(), SCHED_SHORT, &shorty);
-		i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
+		//i_time = short_remaining_time(getpid()); while(i_time==short_remaining_time(getpid()));
 		printf( ANSI_COLOR_CYAN "I am the 4 short"  " errno = %d\n" ANSI_COLOR_RESET, errno);
 		printf( "check if 4 proccess is SHORT  \n");
 		if (is_short(getpid()) == 1)

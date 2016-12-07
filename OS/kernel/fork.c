@@ -792,7 +792,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	if (p->ptrace & PT_PTRACED)
 		send_sig(SIGSTOP, p, 1);
-	wake_up_forked_process(p);	/* do this last */
+	//HW2, Nadav, move father to end of the list
+	if (current->is_short == 1) {
+		wake_up_short_forked_process(current,p);	
+	} else {
+		wake_up_forked_process(p);	/* do this last */
+	}
 	++total_forks;
 	if (clone_flags & CLONE_VFORK)
 		wait_for_completion(&vfork);
