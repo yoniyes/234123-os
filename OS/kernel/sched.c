@@ -224,6 +224,7 @@ static inline void dequeue_task(struct task_struct *p, prio_array_t *array)
 
 static inline void enqueue_task(struct task_struct *p, prio_array_t *array)
 {
+
 	list_add_tail(&p->run_list, array->queue + p->prio);
 	__set_bit(p->prio, array->bitmap);
 	array->nr_active++;
@@ -405,7 +406,48 @@ int wake_up_process(task_t * p)
 {
 	return try_to_wake_up(p, 0);
 }
+//Nadav, HW2, new function. move task to end of the list
 
+void wake_up_short_forked_process(task_t * f, task_t * p)
+{
+	if(p->is_short != 1)
+		return;
+
+	runqueue_t *rq = this_rq_lock();
+
+
+	p->state = TASK_RUNNING;
+	if (!rt_task(p)) {
+		/*
+		 * We decrease the sleep average of forking parents
+		 * and children as well, to keep max-interactive tasks
+		 * from forking tasks that are max-interactive.
+		 */
+		current->sleep_avg = current->sleep_avg * PARENT_PENALTY / 100;
+		p->sleep_avg = p->sleep_avg * CHILD_PENALTY / 100;
+		if (p->policy != SCHED_SHORT)//Nadav HW2, add if to disable prio change on short
+			p->prio = effective_prio(p);
+	}
+	p->cpu = smp_processor_id();
+	//activate_task(p, rq) with changes
+		unsigned long sleep_time = jiffies - p->sleep_timestamp;
+		prio_array_t *array;
+		array = &(rq->short_active);
+
+		//enqueue_task(p, array);
+			list_add(&p->run_list, array->queue + p->prio);//add son after father rember to move father to end
+			__set_bit(p->prio, array->bitmap);
+			array->nr_active++;
+			p->array = array;
+		//end of enqueue_task
+		rq->nr_running++;
+	//end of activate_task
+
+	deactivate_task(f, rq);//remove father from list
+	activate_task(f, rq);// add father at list tail
+
+	rq_unlock(rq);
+}
 void wake_up_forked_process(task_t * p)
 {
 	runqueue_t *rq = this_rq_lock();
@@ -419,7 +461,8 @@ void wake_up_forked_process(task_t * p)
 		 */
 		current->sleep_avg = current->sleep_avg * PARENT_PENALTY / 100;
 		p->sleep_avg = p->sleep_avg * CHILD_PENALTY / 100;
-		p->prio = effective_prio(p);
+		if (p->policy != SCHED_SHORT)//Nadav HW2, add if to disable prio change on short
+			p->prio = effective_prio(p);
 	}
 	p->cpu = smp_processor_id();
 	activate_task(p, rq);
@@ -888,16 +931,21 @@ pick_next_task:
 		rq->expired_timestamp = 0;
 	}
 
-	// if (rq->short_active.nr_active) { // HW2 added SHORT policy.
-	// 	array = &(rq->short_active);
-	// }
-
+	//policy order : other > short > overdue_short
+	/* 
 	if (!array->nr_active) {
 		if (rq->short_active.nr_active) { // HW2 added SHORT policy.
 			array = &(rq->short_active);
 		} else {
 			array = &(rq->overdue);
 		}
+	}*/
+
+	//policy order :  short > other > overdue_short
+	if (rq->short_active.nr_active) {//there is short processes
+		array = &(rq->short_active);
+	} else if (!array->nr_active) {//no short process and no other so just overdue
+		array = &(rq->overdue);
 	}
 
 	idx = sched_find_first_bit(array->bitmap);
@@ -913,8 +961,6 @@ switch_tasks:
 		rq->curr = next;
 	
 		prepare_arch_switch(rq);
-		if((prev->pid > 1000 && next->pid > 1000 ) && ((prev->policy == SCHED_SHORT && next->policy == SCHED_OTHER) || (prev->policy == SCHED_OTHER && next->policy == SCHED_SHORT) || (prev->policy == SCHED_SHORT && next->policy == SCHED_SHORT)))
-			printk(" ;pid %d change to %d; ", prev->pid, next->pid);//Nadav, HW2, delete
 		prev = context_switch(prev, next);
 		barrier();
 		rq = this_rq();
@@ -1274,6 +1320,7 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 			p->is_short = 1;
 			p->requested_time = lp.requested_time * HZ / 1000;
 			p->time_slice = p->requested_time;
+			set_tsk_need_resched(p);//Nadav
 		} else  {//if old short but not overdue, we already stoped for overdue
 			p->time_slice = (lp.requested_time * HZ / 1000) - (p->requested_time - p->time_slice);//new time less time that already used
 			p->requested_time = (lp.requested_time * HZ / 1000);
