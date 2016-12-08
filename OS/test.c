@@ -22,7 +22,135 @@ typedef struct sched_param {
 	int sched_priority, requested_time;
 } sched_param_t;
 
+#ifdef USERPERM
+#define testUserPerm() do {\
+	printf( ANSI_COLOR_YELLOW "==================User Permissions Test=============" ANSI_COLOR_RESET "\n");\
+	printf( ANSI_COLOR_MAGENTA "******** FATHER PROCESS ********" ANSI_COLOR_RESET "\n");\
+	sched_param_t shorty;\
+	shorty.sched_priority = 50;\
+	shorty.requested_time = 200;\
+	sched_setscheduler(getpid(), SCHED_SHORT, &shorty);\
+	printf( "try to make father short. \n");\
+	if (is_short(getpid()) == 1)\
+	{	\
+		printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+	}\
+	else\
+	{\
+		printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+	}\
+	sched_setscheduler(getpid(), SCHED_OTHER, &shorty);\
+	printf( "try to make father other should fail (errno == 1). \n");\
+	if (is_short(getpid()) == 1 && errno == EPERM)\
+	{	\
+		printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+	}\
+	else\
+	{\
+		printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+	}\
+	printf( ANSI_COLOR_BLUE "######## FORKED! ########" ANSI_COLOR_RESET "\n");\
+	pid_t child = fork();\
+	if (child == 0) {\
+		printf( ANSI_COLOR_MAGENTA "******** CHILD PROCESS ********" ANSI_COLOR_RESET "\n");\
+		printf( "Child's euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		printf( ANSI_COLOR_MAGENTA "######## CHILD YIELDS ########" ANSI_COLOR_RESET "\n");\
+		sched_yield();\
+		printf( ANSI_COLOR_MAGENTA "******** CHILD PROCESS ********" ANSI_COLOR_RESET "\n");\
+		sched_param_t shorty;\
+		shorty.sched_priority = 50;\
+		shorty.requested_time = 300;\
+		errno = 0;\
+		sched_setscheduler(getppid(), SCHED_SHORT, &shorty);\
+		printf( "try to set new requested_time for father should succeed (child is root). \n");\
+		if (is_short(getpid()) == 1 && is_short(getppid()) == 1 && errno == 0)\
+		{	\
+			printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		else\
+		{\
+			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		printf( "Child's old euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		seteuid(99);\
+		printf( "Child's new euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		shorty.requested_time = 400;\
+		errno = 0;\
+		sched_setscheduler(getppid(), SCHED_SHORT, &shorty);\
+		printf( "try to set new requested_time for father should fail. \n");\
+		if (is_short(getpid()) == 1 && is_short(getppid()) == 1 && errno == EPERM)\
+		{	\
+			printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		else\
+		{\
+			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		printf( "Child's old euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		seteuid(0);\
+		seteuid(100);\
+		printf( "Child's new euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		errno = 0;\
+		sched_setscheduler(getppid(), SCHED_SHORT, &shorty);\
+		printf( "try to set new requested_time for father should succeed. \n");\
+		if (is_short(getpid()) == 1 && is_short(getppid()) == 1 && errno == 0)\
+		{	\
+			printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		else\
+		{\
+			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		printf( "Child's old euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		seteuid(0);\
+		printf( "Child's new euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		errno = 0;\
+		sched_setscheduler(getppid(), SCHED_OTHER, &shorty);\
+		printf( "try to set SCHED_OTHER for father should fail. \n");\
+		if (is_short(getpid()) == 1 && is_short(getppid()) == 1 && errno == EPERM)\
+		{	\
+			printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		else\
+		{\
+			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		printf("Exiting child...\n");\
+		exit();\
+	} else {\
+		printf( ANSI_COLOR_MAGENTA "******** FATHER PROCESS ********" ANSI_COLOR_RESET "\n");\
+		sched_param_t shorty;\
+		shorty.sched_priority = 50;\
+		shorty.requested_time = 1000;\
+		errno = 0;\
+		printf( "Father's old euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		seteuid(100);\
+		printf( "Father's new euid = " ANSI_COLOR_CYAN "[%d]. \n" ANSI_COLOR_RESET, geteuid());\
+		sched_setscheduler(child, SCHED_SHORT, &shorty);\
+		printf( "try to set new requested_time for child should fail (errno == 1). \n");\
+		if (errno == EPERM)\
+		{	\
+			printf( ANSI_COLOR_GREEN "TEST PASS," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		else\
+		{\
+			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);\
+		}\
+		printf( ANSI_COLOR_MAGENTA "######## FATHER YIELDS ########" ANSI_COLOR_RESET "\n");\
+		sched_yield();\
+		printf( ANSI_COLOR_MAGENTA "******** FATHER PROCESS ********" ANSI_COLOR_RESET "\n");\
+		printf("Exiting father...\n");\
+		printf( ANSI_COLOR_GREEN "USER PERMISSIONS TEST PASS\n" ANSI_COLOR_RESET, errno);\
+		exit();\
+	}\
+} while(0)
+#else
+#define testUserPerm() do {} while(0)
+#endif
+
+
 int main() {
+	testUserPerm();
 	//printf("current process is short?\n%d\n", is_short(getpid()));
 	//printf("errno = %d\n", errno);
 	//sched_setscheduler(getpid(), 5, &shorty);
@@ -333,7 +461,7 @@ int main() {
 		{
 			printf( ANSI_COLOR_RED "TEST FAIL," ANSI_COLOR_CYAN " errno = %d\n" ANSI_COLOR_RESET, errno);
 		}
-
+		
 		exit();
 
 	}
