@@ -732,6 +732,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	// p->time_slice = (current->time_slice + 1) >> 1;
 	// p->first_time_slice = 1;
 	// current->time_slice >>= 1;
+	if(current->policy == SCHED_SHORT) {
 		p->prio = current->prio;// Nadav, HW2 added SHORT policy.
 	}
 	p->requested_time = current->requested_time; // HW2 added SHORT policy.
