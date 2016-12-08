@@ -858,7 +858,7 @@ void scheduler_tick(int user_tick, int system)
 			} else {
 				p->time_slice = TASK_TIMESLICE(p);
 				p->policy = SCHED_OTHER;
-				p->prio = effective_prio(p);//NADAV
+				p->prio = effective_prio(p);//NADAV, back to OTHER
 				enqueue_task(p, rq->active);
 			}
 		}
@@ -943,7 +943,7 @@ pick_next_task:
 	}*/
 
 	//policy order :  short > other > overdue_short
-	if (rq->short_active.nr_active) {//there is short processes
+	if (sched_find_first_bit(array->bitmap) > MAX_RT_PRIO-1 && rq->short_active.nr_active) {//there is short processes
 		array = &(rq->short_active);
 	} else if (!array->nr_active) {//no short process and no other so just overdue
 		array = &(rq->overdue);
@@ -1149,7 +1149,8 @@ void set_user_nice(task_t *p, long nice)
 		dequeue_task(p, array);
 	int static_prio_old = p->static_prio;//HW2, Nadav
 	p->static_prio = NICE_TO_PRIO(nice);
-	p->prio = NICE_TO_PRIO(nice);
+	if(!(p->is_short == -1 && p->policy == SCHED_SHORT))//Nadav, HW2 , no prio to overdue
+		p->prio = NICE_TO_PRIO(nice);
 	if (array) {
 		enqueue_task(p, array);
 		/*
@@ -1273,7 +1274,7 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	 * 1..MAX_USER_RT_PRIO-1, valid priority for SCHED_OTHER is 0.
 	 */
 	retval = -EINVAL;
-	if ((lp.sched_priority < 0 || lp.sched_priority > MAX_USER_RT_PRIO-1) && policy != SCHED_SHORT) // Yoni. Added policy check. SHORT doesn't care for prio.
+	if (policy != SCHED_SHORT && (lp.sched_priority < 0 || lp.sched_priority > MAX_USER_RT_PRIO-1)) // Yoni. Added policy check. SHORT doesn't care for prio.
 		goto out_unlock;
 	//if ((policy == SCHED_OTHER) != (lp.sched_priority == 0))
 	//if ((policy == SCHED_OTHER || policy == SCHED_SHORT) != (lp.sched_priority == 0)) // HW2 SHORT policy added
@@ -1321,7 +1322,7 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	// HW2 added SHORT policy.
 
 	//Nadav
-	if ( policy == SCHED_SHORT) {
+	if (policy == SCHED_SHORT) {
 		if (p->policy != SCHED_SHORT) {//if new short
 			p->is_short = 1;
 			// p->requested_time = lp.requested_time * HZ / 1000; //In jiffies
@@ -1342,11 +1343,14 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	}
 
 	p->policy = policy;
-	p->rt_priority = lp.sched_priority;
-	if (policy != SCHED_OTHER && policy != SCHED_SHORT)
+	if(policy != SCHED_SHORT)//NADAV, HW2, short don't care from policy
+		p->rt_priority = lp.sched_priority;
+	if (policy != SCHED_OTHER && policy != SCHED_SHORT) {
 		p->prio = MAX_USER_RT_PRIO-1 - p->rt_priority;
-	else
+	}
+	else {
 		p->prio = p->static_prio;
+	}
 	if (array)
 		activate_task(p, task_rq(p));
 
