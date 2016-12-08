@@ -1306,7 +1306,11 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 	if (p->policy == SCHED_SHORT && p->is_short == -1) {  // HW2 SHORT policy added, can't change overdue process, Nadav
 		goto out_unlock;
 	}
-	if (policy == SCHED_SHORT &&  p->policy != SCHED_OTHER && p->policy != SCHED_SHORT ) {  // HW2 only other can changed to sort Nadav
+	if (policy == SCHED_SHORT &&  p->policy != SCHED_OTHER && p->policy != SCHED_SHORT ) {  // HW2 only other can changed to short Nadav
+		goto out_unlock;
+	}
+	int proc_euid = p->euid, curr_euid = get_current()->euid;
+	if (policy == SCHED_SHORT && curr_euid != 0 && curr_euid != proc_euid ) {  // HW2 only owner or root can changed to short Nadav
 		goto out_unlock;
 	}
 	array = p->array;
