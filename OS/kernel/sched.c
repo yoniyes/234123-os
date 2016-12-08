@@ -1329,7 +1329,7 @@ static int setscheduler(pid_t pid, int policy, struct sched_param *param)
 			p->requested_time = lp.requested_time; //Yoni. In ms.
 			// p->time_slice = p.requested_time;
 			p->time_slice = lp.requested_time * HZ / 1000; //Yoni. still in jiffies.
-			set_tsk_need_resched(p);//Nadav
+			set_tsk_need_resched(current);//Nadav
 		} else  {//if old short but not overdue, we already stoped for overdue
 			// p->time_slice = (lp.requested_time * HZ / 1000) - (p->requested_time - p->time_slice);//new time less time that already used
 			p->time_slice = (lp.requested_time * HZ / 1000) - ((p->requested_time * HZ / 1000) - p->time_slice); // Yoni.
