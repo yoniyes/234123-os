@@ -1,0 +1,2 @@
+Iterations=2
+nices=8,9,-4,-2
