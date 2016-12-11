@@ -1528,6 +1528,12 @@ asmlinkage long sys_sched_yield(void)
 	runqueue_t *rq = this_rq_lock();
 	prio_array_t *array = current->array;
 	int i;
+	//HW2, Nadav, short just move to the end of line
+	if(current->policy == SCHED_SHORT) {
+		deactivate_task(current, rq);//remove task from list
+		activate_task(current, rq);// add task at list tail
+		goto out_unlock; 
+	}
 
 	if (unlikely(rt_task(current))) {
 		list_del(&current->run_list);
